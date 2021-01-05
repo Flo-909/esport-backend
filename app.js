@@ -13,11 +13,9 @@ require('./models/connection')
 var app = express();
 
 var corsOptions = {
-  origin: process.env.CLIENT_ROUTE_PROD,
+  origin: "https://esport-influence.netlify.app",
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
-
-console.log('env', process.env.CLIENT_ROUTE_PROD)
 
 app.use(cors(corsOptions))
 
