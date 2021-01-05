@@ -6,14 +6,18 @@ var logger = require('morgan');
 var cors = require('cors')
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+require('dotenv').config();
+const { Console } = require('console');
 
 require('./models/connection')
 var app = express();
 
 var corsOptions = {
-  origin: 'http://localhost:3000' || 'https://esport-influence.netlify.app/',
+  origin: process.env.CLIENT_ROUTE_PROD,
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
+
+console.log('env', process.env.CLIENT_ROUTE_PROD)
 
 app.use(cors(corsOptions))
 
