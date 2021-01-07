@@ -8,7 +8,7 @@ var options = {
 }
 
 
-mongoose.connect("mongodb+srv://florian:tr-909@cluster0.1viue.mongodb.net/esport_data?retryWrites=true&w=majority",
+mongoose.connect(process.env.MONGO_DB,
     options,
     function(err){
         if (err) {
