@@ -12,12 +12,12 @@ const { Console } = require('console');
 require('./models/connection')
 var app = express();
 
-var corsOptions = {
-  origin: "https://esport-influence.netlify.app",
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-}
+// var corsOptions = {
+//   origin: "https://esport-influence.netlify.app",
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }
 
-app.use(cors(corsOptions))
+app.use(cors())
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
