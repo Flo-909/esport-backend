@@ -7,7 +7,6 @@ var options = {
     useNewUrlParser: true
 }
 
-
 mongoose.connect(process.env.MONGO_DB,
     options,
     function(err){
