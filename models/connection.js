@@ -7,7 +7,8 @@ var options = {
     useNewUrlParser: true
 }
 
-mongoose.connect(process.env.MONGO_DB,
+
+mongoose.connect("mongodb+srv://florian:tr-909@cluster0.1viue.mongodb.net/esport_data?retryWrites=true&w=majority",
     options,
     function(err){
         if (err) {
