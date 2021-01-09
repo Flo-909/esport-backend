@@ -36,6 +36,10 @@ var mongoose = require('mongoose');
 const userModel = require('../models/users');
 const campaignModel = require('../models/campaigns');
 
+router.get('/', async function (req, res, next) {
+  res.render('index', {title: "Esport Backend"})
+});
+
 
 
 /* GET home page. */
