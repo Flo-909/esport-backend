@@ -17,6 +17,12 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -25,16 +31,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'reactapp/build')));
-
-// get views from new build folder, which was created from the react app
-// Serve static files from the React frontend app
-// app.use(express.static(path.join(__dirname, 'client/build')))
-// Anything that doesn't match the above, send back index.html
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname + '/client/build/index.html'))
-// })
+// app.use(express.static(path.join(__dirname, 'views')));
+// app.use(express.static(path.join(__dirname, 'reactapp/build')));
 
 
 app.use('/', indexRouter);
