@@ -1,8 +1,5 @@
 const mongoose = require('mongoose')
 
-
-//Reviews
-
 const reviewSchema = mongoose.Schema({
     rate:Number,
     audience:Number,
@@ -10,7 +7,6 @@ const reviewSchema = mongoose.Schema({
     user_writter:[userSchema],
     user_evaluated:[userSchema]
 })
-
 
 const reviewModel = mongoose.model('reviews', reviewSchema)
 

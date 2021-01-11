@@ -1,22 +1,5 @@
 const mongoose = require('mongoose')
 
-//Campagne
-
-// const campagne = mongoose.Schema({
-//     campaignName:String,
-//     description:String,
-//     dateStart:Date,
-//     dateEnd:Date,
-//     status:String,
-//     audienceCriteria:String,
-//     uploadedDoc:String,
-//     public_id_doc:String,
-//     id_influenceur_participant:String,
-    
-
-// })
-
-// User
 const userSchema = mongoose.Schema({
     userName:String,
     firstName: String,

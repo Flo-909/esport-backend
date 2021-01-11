@@ -1,7 +1,5 @@
 const mongoose = require('mongoose')
 
-// Campagne
-
 const campaignSchema = mongoose.Schema({
     campaignName:String,
     description:String,
@@ -14,8 +12,6 @@ const campaignSchema = mongoose.Schema({
     public_id_doc:String,
     influencer_id:String, 
     brand_id:String,
-
-
 })
 
 const campaignModel = mongoose.model('campaigns', campaignSchema)
