@@ -29,9 +29,8 @@ app.set("view engine", "ejs");
 app.use(logger("dev"));
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(bodyParser.raw({ type: "multipart/form-data" }));
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
