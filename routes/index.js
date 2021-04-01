@@ -1,45 +1,74 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const uid2 = require("uid2");
-const SHA256 = require('crypto-js/sha256');
-const encBase64 = require('crypto-js/enc-base64');
-var mongoose = require('mongoose');
-const userModel = require('../models/users');
-const campaignModel = require('../models/campaigns');
+const SHA256 = require("crypto-js/sha256");
+const encBase64 = require("crypto-js/enc-base64");
+const mongoose = require("mongoose");
+const userModel = require("../models/users");
+const campaignModel = require("../models/campaigns");
+const multer = require("multer");
+const nodemailer = require("nodemailer");
+const request = require("sync-request");
 
-router.get('/', async function (req, res, next) {
-  res.render('index', { title: "Esport Backend" })
+const cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: "dugu0nhcg",
+  api_key: "158255786999153",
+  api_secret: "L3H4OhxjKr04ILNd50Xi2j5sDBY",
 });
 
-router.post('/sign-up/brand', async function (req, res, next) {
-  console.log('PASSING', req.body);
-  var error = []
-  var result = false
-  var saveUser = null
-  var token = null
+let transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    type: "OAuth2",
+    user: process.env.MAIL_USERNAME,
+    pass: process.env.MAIL_PASSWORD,
+    clientId: process.env.OAUTH_CLIENTID,
+    clientSecret: process.env.OAUTH_CLIENT_SECRET,
+    refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+  },
+});
+
+let mailOptions = {
+  from: "lerouzic.florian1@@gmail.com",
+  to: "lerouzic.florian1@@gmail.com",
+  subject: "Nodemailer Project",
+  text: "Hi from your nodemailer project",
+};
+
+router.get("/", async function (req, res, next) {
+  res.render("index", { title: "Esport Backend" });
+});
+
+router.post("/sign-up/brand", async function (req, res, next) {
+  console.log("PASSING", req.body);
+  let error = [];
+  let result = false;
+  let saveUser = null;
+  let token = null;
 
   const data = await userModel.findOne({
-    email: req.body.emailFromFront
-  })
+    email: req.body.emailFromFront,
+  });
 
   if (data != null) {
-    error.push('User Already Exist')
+    error.push("User Already Exist");
   }
 
-  if (req.body.firstNameFromFront == ''
-    || req.body.lastNameFromFront == ''
-    || req.body.emailFromFront == ''
-    || req.body.passwordFromFront == ''
-    || req.body.phoneFromFront == ''
-    || req.body.companyFromFront == ''
+  if (
+    req.body.firstNameFromFront == "" ||
+    req.body.lastNameFromFront == "" ||
+    req.body.emailFromFront == "" ||
+    req.body.passwordFromFront == "" ||
+    req.body.companyFromFront == ""
   ) {
-    console.log('ERROR');
-    error.push('Empty Field')
+    console.log("ERROR");
+    error.push("Empty Field");
   }
 
   if (error.length === 0) {
-    console.log('NO ERROR');
-    var salt = uid2(32)
+    console.log("NO ERROR");
+    var salt = uid2(32);
     var newUser = new userModel({
       company: req.body.companyFromFront,
       firstName: req.body.firstNameFromFront,
@@ -50,42 +79,44 @@ router.post('/sign-up/brand', async function (req, res, next) {
       salt: salt,
       phone: req.body.phoneFromFront,
       role: "brand",
-    })
-    console.log('company', req.body.companyFromFront)
-    saveUser = await newUser.save()
+    });
+    console.log("company", req.body.companyFromFront);
+    saveUser = await newUser.save();
     if (saveUser) {
-      result = true
-      token = saveUser.token
+      result = true;
+      token = saveUser.token;
     }
   }
-  res.json({ result, saveUser, error, token })
-})
-router.post('/sign-up/influencer', async function (req, res, next) {
-
-  var error = []
-  var result = false
-  var saveUser = null
-  var token = null
+  res.json({ result, saveUser, error, token });
+});
+router.post("/sign-up/influencer", async function (req, res, next) {
+  let error = [];
+  let result = false;
+  let saveUser = null;
+  let token = null;
 
   const data = await userModel.findOne({
-    email: req.body.emailFromFront
-  })
+    email: req.body.emailFromFront,
+  });
   if (data != null) {
-    error.push('User Already Exist')
+    error.push("User Already Exist");
   }
-  if (req.body.firstNameFromFront == ''
-    || req.body.lastNameFromFront == ''
-    || req.body.userNameFromFront == ''
-    || req.body.emailFromFront == ''
-    || req.body.passwordFromFront == ''
-    || req.body.phoneFromFront == ''
-    || req.body.bioFromFront == ''
+  if (
+    req.body.firstNameFromFront == "" ||
+    req.body.lastNameFromFront == "" ||
+    req.body.userNameFromFront == "" ||
+    req.body.emailFromFront == "" ||
+    req.body.passwordFromFront == "" ||
+    req.body.bioFromFront == "" ||
+    req.body.favoriteGameFromFront == "" ||
+    req.body.numberFollower == "" ||
+    req.body.urlSocialNetworkFromFront == ""
   ) {
-    error.push('Empty Field')
+    error.push("Empty Field");
   }
   if (error.length === 0) {
-    var salt = uid2(32)
-    var newUser = new userModel({
+    let salt = uid2(32);
+    let newUser = new userModel({
       userName: req.body.userNameFromFront,
       firstName: req.body.firstNameFromFront,
       lastName: req.body.lastNameFromFront,
@@ -99,152 +130,250 @@ router.post('/sign-up/influencer', async function (req, res, next) {
       numberFollower: req.body.numberFollowerFromFront,
       favoriteGame: req.body.favoriteGameFromFront,
       urlSocialNetwork: req.body.urlSocialNetworkFromFront,
-    })
-    saveUser = await newUser.save()
+    });
+    saveUser = await newUser.save();
     if (saveUser) {
-      result = true
-      token = saveUser.token
+      result = true;
+      token = saveUser.token;
     }
   }
-  res.json({ result, saveUser, error, token })
-})
+  res.json({ result, saveUser, error, token });
+});
 
-router.post('/sign-in', async function (req, res, next) {
-  var result = false
-  var user = null
-  var error = []
-  var token = null
+router.post("/sign-in", async function (req, res, next) {
+  let result = false;
+  let user = null;
+  let error = [];
+  let token = null;
 
-  if (req.body.emailFromFront == ''
-    || req.body.passwordFromFront == ''
-  ) {
-    error.push('Empty Field')
+  if (req.body.emailFromFront == "" || req.body.passwordFromFront == "") {
+    error.push("Empty Field");
   }
 
   if (error.length == 0) {
     user = await userModel.findOne({
       email: req.body.emailFromFront,
-    })
+    });
 
-    console.log("log-user", user)
+    console.log("log-user", user);
 
     if (user) {
-      const passwordEncrypt = SHA256(req.body.passwordFromFront + user.salt).toString(encBase64)
+      const passwordEncrypt = SHA256(
+        req.body.passwordFromFront + user.salt
+      ).toString(encBase64);
       if (passwordEncrypt == user.password) {
-        result = true
-        token = user.token
+        result = true;
+        token = user.token;
       } else {
-        result = false
-        error.push('Incorrect Password ')
+        result = false;
+        error.push("Incorrect Password ");
       }
     } else {
-      error.push('Incorrect Email')
+      error.push("Incorrect Email");
     }
   }
-  res.json({ result, user, error, token })
-})
+  res.json({ result, user, error, token });
+});
 
-router.post('/addcampaign', async function (req, res, next) {
-  var error = []
+router.post("/addcampaign", async function (req, res, next) {
+  let error = [];
 
-  if (req.body.nameCampaignFromFront == ''
-    || req.body.descriptionFromFront == ''
-    || req.body.audienceMinFromFront == ''
-    || req.body.audienceMaxFromFront == ''
+  if (
+    req.body.nameCampaignFromFront == "" ||
+    req.body.descriptionFromFront == "" ||
+    req.body.audienceMinFromFront == "" ||
+    req.body.audienceMaxFromFront == ""
   ) {
-    error.push('Empty Field')
-    res.json({ error })
+    error.push("Empty Field");
+    res.json({ error });
   } else {
-    var user = await userModel.findOne({ token: req.body.token })
-    var campaign = new campaignModel({
+    const user = await userModel.findOne({ token: req.body.token });
+    const campaign = new campaignModel({
       campaignName: req.body.nameCampaignFromFront,
       dateStart: req.body.dateStartFromFront,
       dateEnd: req.body.dateEndFromFront,
-      status: 'Created',
+      status: "Created",
       description: req.body.descriptionFromFront,
       audienceCriteriaMin: req.body.audienceMinFromFront,
       audienceCriteriaMax: req.body.audienceMaxFromFront,
       uploadedDoc: req.body.uploadDocFromFront,
-      brand_id: user._id, 
-    })
-    var campaignSave = await campaign.save()
-    let insertId = await userModel.findOneAndUpdate({ token: req.body.token }, { campaign_id: campaignSave._id }) 
-    res.json({ campaignSave })
+      brand_id: user._id,
+    });
+    const campaignSave = await campaign.save();
+    let insertId = await userModel.findOneAndUpdate(
+      { token: req.body.token },
+      { campaign_id: campaignSave._id }
+    );
+    res.json({ campaignSave });
   }
-
 });
 
-router.get('/get-campaign-details/:id', async function (req, res, next) {
-  var returnCampaign = await campaignModel.findOne({ _id: req.params.id })
-  console.log('params', req.params, returnCampaign)
-  res.json({ returnCampaign })
+router.get("/get-campaign-details/:id", async function (req, res, next) {
+  const returnCampaign = await campaignModel.findOne({ _id: req.params.id });
+  console.log("params", req.params, returnCampaign);
+  res.json({ returnCampaign });
 });
 
-router.get('/mycampaign', async function (req, res, next) {
-  console.log('req', req.query)
-  var company = await userModel.findOne({ token: req.query.companyToken })
-  var myCampaign = await campaignModel.find({ brand_id: company._id })
-  console.log('myCampaign', myCampaign, company)
-  res.json({ myCampaign, company })
+router.get("/mycampaign", async function (req, res, next) {
+  console.log("req", req.query);
+  const company = await userModel.findOne({ token: req.query.companyToken });
+  const myCampaign = await campaignModel.find({ brand_id: company._id });
+  console.log("myCampaign", myCampaign, company);
+  res.json({ myCampaign, company });
 });
 
-router.post('/campaign-apply', async function (req, res, next) {
-  console.log('req', req.body)
-  var influencer = await userModel.findOne({ token: req.body.token })
-  console.log('influ', influencer)
-  let updatedCampaign = await campaignModel.findOneAndUpdate({ _id: req.body.id }, { influencer_id: influencer._id, status: "Waiting" })
-  console.log("_id", req.body.id)
-  res.json({ updatedCampaign })
+router.post("/campaign-apply", async function (req, res, next) {
+  console.log("campaign-apply req", req.body);
+  let influencer = await userModel.findOne({ token: req.body.token });
+  console.log("influ", influencer);
+  let updatedCampaign = await campaignModel.findOneAndUpdate(
+    { _id: req.body.id },
+    { influencer_id: influencer._id, status: "Waiting" }
+  );
+  console.log("_id", req.body.id);
+  transporter.sendMail(mailOptions, function (err, data) {
+    if (err) {
+      console.log("Error " + err);
+    } else {
+      console.log("Email sent successfully");
+    }
+  });
+  res.json({ updatedCampaign });
 });
 
-router.get('/get-influencer-request-list', async function (req, res, next) {
-  var brand = await userModel.findOne({ token: req.query.brandToken })
-  console.log(req.query)
-  var returnCampaignDetail = await campaignModel.findOne({ brand_id: brand.id })
-  var influenceur = await userModel.findOne({ _id: returnCampaignDetail.influencer_id })
-  console.log("influenceurnn", influenceur)
-  res.json({ returnCampaignDetail, influenceur })
+router.get("/get-influencer-request-list", async function (req, res, next) {
+  let brand = await userModel.findOne({ token: req.query.brandToken });
+  console.log(req.query);
+  var returnCampaignDetail = await campaignModel.findOne({
+    brand_id: brand.id,
+  });
+  let influenceur = await userModel.findOne({
+    _id: returnCampaignDetail.influencer_id,
+  });
+  console.log("influenceurnn", influenceur);
+  res.json({ returnCampaignDetail, influenceur });
 });
 
-router.post('/update-request-acc', async function (req, res, next) {
-  var brand = await userModel.findOne({ token: req.body.token })
-  console.log(brand)
-  var update = await campaignModel.findOneAndUpdate({ brand_id: brand.id }, { status: "Accepted" })
-  console.log(update)
-  res.json({ update })
+router.post("/update-request-acc", async function (req, res, next) {
+  let brand = await userModel.findOne({ token: req.body.token });
+  console.log(brand);
+  let update = await campaignModel.findOneAndUpdate(
+    { brand_id: brand.id },
+    { status: "Accepted" }
+  );
+  console.log(update);
+  res.json({ update });
 });
 
-router.post('/update-request-ref', async function (req, res, next) {
-  var brand = await userModel.findOne({ token: req.body.token })
-  console.log(brand)
-  var update = await campaignModel.findOneAndUpdate({ brand_id: brand.id }, { status: "Refused" })
-  console.log(update)
-  res.json({ update })
+router.post("/update-request-ref", async function (req, res, next) {
+  let brand = await userModel.findOne({ token: req.body.token });
+  console.log(brand);
+  let update = await campaignModel.findOneAndUpdate(
+    { brand_id: brand.id },
+    { status: "Refused" }
+  );
+  console.log(update);
+  res.json({ update });
 });
 
-router.get('/get-campaign', async function (req, res, next) {
-  var campaignListItem = await campaignModel.find({ status: "Created" })
-  console.log('camp', campaignListItem)
-  res.json({ campaignListItem })
+router.get("/get-campaign", async function (req, res, next) {
+  const campaignListItem = await campaignModel.find({ status: "Created" });
+  console.log("camp", campaignListItem);
+  res.json({ campaignListItem });
 });
 
-router.get('/influencerdetails', async function (req, res, next) {
-  var influencerProfil = await userModel.findOne({ token: req.query.influencerToken })
-  res.json({ influencerProfil })
+router.get("/influencerdetails", async function (req, res, next) {
+  const influencerProfil = await userModel.findOne({
+    token: req.query.influencerToken,
+  });
+  res.json({ influencerProfil });
 });
 
-router.get('/get-request-list-influencer', async function (req, res, next) {
-  var influencer = await userModel.findOne({ token: req.query.influencerToken })
-  var returnCampaignDetail = await campaignModel.find({ influencer_id: influencer.id })
-  var brand = await userModel.findOne({ _id: returnCampaignDetail.brand_id })
+router.get("/get-request-list-influencer", async function (req, res, next) {
+  let influencer = await userModel.findOne({
+    token: req.query.influencerToken,
+  });
+  const returnCampaignDetail = await campaignModel.find({
+    influencer_id: influencer.id,
+  });
+  let brand = await userModel.findOne({ _id: returnCampaignDetail.brand_id });
 
-  res.json({ returnCampaignDetail, brand })
+  res.json({ returnCampaignDetail, brand });
 });
 
-router.get('/branddetails', async function (req, res, next) {
+router.get("/branddetails", async function (req, res, next) {
   console.log("REQ QUERY", req.query);
-  var brandProfil = await userModel.findOne({ token: req.query.brandToken })
-  res.json({ brandProfil })
+  const brandProfil = await userModel.findOne({ token: req.query.brandToken });
+  res.json({ brandProfil });
 });
+
+// const ALLOWED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+
+// const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: "./public/uploads/images",
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
+    );
+  },
+});
+
+const upload = multer({
+  storage: storage,
+});
+
+// const upload = multer({
+//   storage,
+//   limits: { fileSize: 1000000 },
+// });
+
+// const singleUpload = upload.single("image");
+
+// const singleUploadCtrl = (req, res, next) => {
+//   singleUpload(req, res, (error) => {
+//     console.log("singleUploadCtrl");
+//     if (error) {
+//       return res.status(422).send({ message: "Image upload fail!" });
+//     }
+//     next();
+//   });
+// };
+
+router.post("/image-upload", upload.single("image"), function (req, res) {
+  console.log("req.file", req.file, req.files);
+  console.log("req.body", req.body);
+  try {
+    if (!req.file) {
+      throw new Error("Image is not presented!");
+    }
+    console.log(req.file);
+
+    return res.json({ message: "Huraaaay" });
+  } catch (e) {
+    return res.status(422).send({ message: e.message });
+  }
+});
+
+// console.log("upload", req.body);
+// const resultCloudinary = await cloudinary.uploader.upload(req.body);
+// console.log("resultCloudinary", resultCloudinary);
+
+// try {
+//   const newImage = new Image({
+//     imageUrl: req.body.uploadedDoc,
+//   });
+//   await newImage.save();
+//   res.json(newImage.uploadedDoc);
+// } catch (err) {
+//   console.error("Something went wrong", err);
+// }
+
+// ​
+// app.get('/getLatest', async (req, res) => {
+//   const getImage = await Image.findOne().sort({ _id: -1 });
+//   res.json(getImage.uploadedDoc);
+// });
 
 module.exports = router;

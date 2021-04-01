@@ -1,5 +1,5 @@
 // router.post('/addcampaign', async function(req, res, next) {
-  
+
 //     // We want to update our onGoingTicket for our user
 //     var user = await userModel.findOne({token:req.body.token})
 //     var campagne = new campagneModel({
@@ -10,36 +10,36 @@
 //       description: req.body.descriptionFromFront,
 //       audienceCriteria: req.body.audienceFromFront,
 //       uploadedDoc: req.body.uploadDocFromFront,
-//       brand_id: user._id // id de la marque récupérer a la ligne 175 avec le token 
+//       brand_id: user._id // id de la marque récupérer a la ligne 175 avec le token
 //     })
 //       var campagneSave = await campagne.save()
 //      user.campagnes.push(campagneSave._id) // ajouter la nouvelle id de la creation de campagne
-  
+
 //     var userSaved = await user.save()
-  
+
 //     console.log(userSaved)
-  
+
 //     res.json({userSaved})
-    
+
 //   });
 
 useEffect(() => {
-    async function fetchData() {
-    const response = await fetch('/addcampaign')
-    const jsonResponse = await response.json()
-    setCampaignList(jsonResponse.campaignListItem)
-}
-fetchData()
-  }, [])
+  async function fetchData() {
+    const response = await fetch("/addcampaign");
+    const jsonResponse = await response.json();
+    setCampaignList(jsonResponse.campaignListItem);
+  }
+  fetchData();
+}, []);
 //   var campagne = await campagneModel.findOne({id:req.body.id})
 //   .updateOne({}, { influencer_id: req.body.id, status:"waiting" });
 
 //   var campagneSaved = await campagne.save()
 
 //   res.json({campagneSaved})
-  
+
 // });
-  
+
 // UPLOAD DOC
 // const multer = require('multer'),
 // const uuidv4 = require('uuid/v4'),
@@ -66,52 +66,17 @@ fetchData()
 //   }
 // });
 
-// LOCAL STORAGE NE PAS EFFACER SVP 
-
-// const tokenLocal = localStorage.getItem('tokenLocal');
-// const role = localStorage.getItem('role')
-// const RenderRoute = () => {
-
-//   if(tokenLocal && role === "influenceur") {
-//     return(
-//       <Switch>
-//         <Route path="/login-page" exact component={LoginPage} />
-//         <Route path="/select-campaign" exact component={SelectCampagne} />
-//         <Route path="/campaign-apply/:id"  component={CampaignApply} />
-//         <Route path="/profile-page" exact component={ProfilePage} />
-//         <Route path="/sign-up/brand" exact component={SignUpBrand} />
-//         <Route path="/mynetwork" exact component={MyNetwork}/>
-//         <Route path="/messaging" exact component={Messaging}/>
-//         <Route path="/login-messagerie" exact component={Login}/>
-//          <Route path="/" exact component={LandingPage} />
-//         </Switch> 
-//         )}
-//         else if (tokenLocal && role === "brand") {
-//           return( 
-//             <Switch>
-//             <Route path="/choiceinfluencer" exact component={ChoiceInfluencer}/>
-//             <Route path="/login-page" exact component={LoginPage} />
-//             <Route path="/profile-page" exact component={ProfilePage} />
-//             <Route path="/sign-up/brand" exact component={SignUpBrand} />
-//             <Route path="/sign-up/influencer" exact component={SignUpInfluencer} />
-//             <Route path="/mynetwork" exact component={MyNetwork}/>
-//             <Route path="/messaging" exact component={Messaging}/>
-//             <Route path="/choiceinfluencer" exact component={ChoiceInfluencer}/>
-//             <Route path="/login-messagerie" exact component={Login}/>
-//             <Route path="/" exact component={LandingPage} />
-//             </Switch> 
-//              )} else  {
-
-//               return(
-//                 <Switch>
-// //                <Route path="/login-page" exact component={LoginPage} />
-
-{/* <Route path="/select-campaign" exact component={SelectCampagne} /> */ }
-
-{/* <Route path="/" exact component={LandingPage} /> */ }
-{/* <Route path="/login-page" exact component={LoginPage} /> */ }
-//     </Switch> 
-//              )} 
-// }
-
- {/* {RenderRoute()}  */}
+const tokenLocal = localStorage.getItem("tokenLocal");
+const role = localStorage.getItem("role");
+const RenderRoute = () => {
+  if (tokenLocal && role === "influenceur") {
+    return <Switch></Switch>;
+  } else if (tokenLocal && role === "brand") {
+    return <Switch></Switch>;
+  } else {
+    return <Switch></Switch>;
+  }
+};
+{
+  RenderRoute();
+}
