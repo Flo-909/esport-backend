@@ -41,7 +41,6 @@ router.get("/", async function (req, res, next) {
 });
 
 router.post("/sign-up/brand", async function (req, res, next) {
-  console.log("PASSING", req.body);
   let error = [];
   let result = false;
   let saveUser = null;
@@ -62,14 +61,12 @@ router.post("/sign-up/brand", async function (req, res, next) {
     req.body.passwordFromFront == "" ||
     req.body.companyFromFront == ""
   ) {
-    console.log("ERROR");
     error.push("Empty Field");
   }
 
   if (error.length === 0) {
-    console.log("NO ERROR");
-    var salt = uid2(32);
-    var newUser = new userModel({
+    let salt = uid2(32);
+    let newUser = new userModel({
       company: req.body.companyFromFront,
       firstName: req.body.firstNameFromFront,
       lastName: req.body.lastNameFromFront,
@@ -80,7 +77,6 @@ router.post("/sign-up/brand", async function (req, res, next) {
       phone: req.body.phoneFromFront,
       role: "brand",
     });
-    console.log("company", req.body.companyFromFront);
     saveUser = await newUser.save();
     if (saveUser) {
       result = true;
@@ -155,8 +151,6 @@ router.post("/sign-in", async function (req, res, next) {
       email: req.body.emailFromFront,
     });
 
-    console.log("log-user", user);
-
     if (user) {
       const passwordEncrypt = SHA256(
         req.body.passwordFromFront + user.salt
@@ -210,27 +204,21 @@ router.post("/addcampaign", async function (req, res, next) {
 
 router.get("/get-campaign-details/:id", async function (req, res, next) {
   const returnCampaign = await campaignModel.findOne({ _id: req.params.id });
-  console.log("params", req.params, returnCampaign);
   res.json({ returnCampaign });
 });
 
 router.get("/mycampaign", async function (req, res, next) {
-  console.log("req", req.query);
   const company = await userModel.findOne({ token: req.query.companyToken });
   const myCampaign = await campaignModel.find({ brand_id: company._id });
-  console.log("myCampaign", myCampaign, company);
   res.json({ myCampaign, company });
 });
 
 router.post("/campaign-apply", async function (req, res, next) {
-  console.log("campaign-apply req", req.body);
   let influencer = await userModel.findOne({ token: req.body.token });
-  console.log("influ", influencer);
   let updatedCampaign = await campaignModel.findOneAndUpdate(
     { _id: req.body.id },
     { influencer_id: influencer._id, status: "Waiting" }
   );
-  console.log("_id", req.body.id);
   transporter.sendMail(mailOptions, function (err, data) {
     if (err) {
       console.log("Error " + err);
@@ -243,42 +231,35 @@ router.post("/campaign-apply", async function (req, res, next) {
 
 router.get("/get-influencer-request-list", async function (req, res, next) {
   let brand = await userModel.findOne({ token: req.query.brandToken });
-  console.log(req.query);
   var returnCampaignDetail = await campaignModel.findOne({
     brand_id: brand.id,
   });
   let influenceur = await userModel.findOne({
     _id: returnCampaignDetail.influencer_id,
   });
-  console.log("influenceurnn", influenceur);
   res.json({ returnCampaignDetail, influenceur });
 });
 
 router.post("/update-request-acc", async function (req, res, next) {
   let brand = await userModel.findOne({ token: req.body.token });
-  console.log(brand);
   let update = await campaignModel.findOneAndUpdate(
     { brand_id: brand.id },
     { status: "Accepted" }
   );
-  console.log(update);
   res.json({ update });
 });
 
 router.post("/update-request-ref", async function (req, res, next) {
   let brand = await userModel.findOne({ token: req.body.token });
-  console.log(brand);
   let update = await campaignModel.findOneAndUpdate(
     { brand_id: brand.id },
     { status: "Refused" }
   );
-  console.log(update);
   res.json({ update });
 });
 
 router.get("/get-campaign", async function (req, res, next) {
   const campaignListItem = await campaignModel.find({ status: "Created" });
-  console.log("camp", campaignListItem);
   res.json({ campaignListItem });
 });
 
@@ -302,7 +283,6 @@ router.get("/get-request-list-influencer", async function (req, res, next) {
 });
 
 router.get("/branddetails", async function (req, res, next) {
-  console.log("REQ QUERY", req.query);
   const brandProfil = await userModel.findOne({ token: req.query.brandToken });
   res.json({ brandProfil });
 });
