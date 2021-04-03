@@ -287,43 +287,36 @@ router.get("/branddetails", async function (req, res, next) {
   res.json({ brandProfil });
 });
 
-// const ALLOWED_FORMATS = ["image/jpeg", "image/png", "image/jpg"];
+const DIR = "./public/";
 
-// const storage = multer.memoryStorage();
 const storage = multer.diskStorage({
-  destination: "./public/uploads/images",
-  filename: function (req, file, cb) {
-    cb(
-      null,
-      file.fieldname + "-" + Date.now() + path.extname(file.originalname)
-    );
+  destination: (req, file, cb) => {
+    cb(null, DIR);
+  },
+  filename: (req, file, cb) => {
+    const fileName = file.originalname.toLowerCase().split(" ").join("-");
+    cb(null, fileName + Date.now());
   },
 });
 
-const upload = multer({
+var upload = multer({
   storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (
+      file.mimetype == "image/png" ||
+      file.mimetype == "image/jpg" ||
+      file.mimetype == "image/jpeg"
+    ) {
+      cb(null, true);
+    } else {
+      cb(null, false);
+      return cb(new Error("Only .png, .jpg and .jpeg format allowed!"));
+    }
+  },
 });
 
-// const upload = multer({
-//   storage,
-//   limits: { fileSize: 1000000 },
-// });
-
-// const singleUpload = upload.single("image");
-
-// const singleUploadCtrl = (req, res, next) => {
-//   singleUpload(req, res, (error) => {
-//     console.log("singleUploadCtrl");
-//     if (error) {
-//       return res.status(422).send({ message: "Image upload fail!" });
-//     }
-//     next();
-//   });
-// };
-
 router.post("/image-upload", upload.single("image"), function (req, res) {
-  console.log("req.file", req.file, req.files);
-  console.log("req.body", req.body);
+  console.log("req.file", req.file);
   try {
     if (!req.file) {
       throw new Error("Image is not presented!");
@@ -336,24 +329,9 @@ router.post("/image-upload", upload.single("image"), function (req, res) {
   }
 });
 
-// console.log("upload", req.body);
-// const resultCloudinary = await cloudinary.uploader.upload(req.body);
-// console.log("resultCloudinary", resultCloudinary);
-
-// try {
-//   const newImage = new Image({
-//     imageUrl: req.body.uploadedDoc,
-//   });
-//   await newImage.save();
-//   res.json(newImage.uploadedDoc);
-// } catch (err) {
-//   console.error("Something went wrong", err);
-// }
-
-// ​
-// app.get('/getLatest', async (req, res) => {
-//   const getImage = await Image.findOne().sort({ _id: -1 });
-//   res.json(getImage.uploadedDoc);
-// });
+// 1. send to cloundinary
+// 2. obtain URL
+// 3. send to front
+// 4. Onpress Submit Confirm sending URL in image field
 
 module.exports = router;
