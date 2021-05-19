@@ -9,8 +9,8 @@ const campaignModel = require("../models/campaigns");
 const multer = require("multer");
 const nodemailer = require("nodemailer");
 const request = require("sync-request");
-
 const cloudinary = require("cloudinary").v2;
+
 cloudinary.config({
   cloud_name: "dugu0nhcg",
   api_key: "158255786999153",
@@ -53,13 +53,13 @@ router.post("/sign-up/brand", async function (req, res, next) {
   if (data != null) {
     error.push("User Already Exist");
   }
-
   if (
     req.body.firstNameFromFront == "" ||
     req.body.lastNameFromFront == "" ||
     req.body.emailFromFront == "" ||
     req.body.passwordFromFront == "" ||
-    req.body.companyFromFront == ""
+    req.body.companyFromFront == "" ||
+    req.body.imageUploadFromFront == ""
   ) {
     error.push("Empty Field");
   }
@@ -70,6 +70,7 @@ router.post("/sign-up/brand", async function (req, res, next) {
       company: req.body.companyFromFront,
       firstName: req.body.firstNameFromFront,
       lastName: req.body.lastNameFromFront,
+      imageUpload: req.body.imageUploadFromFront,
       email: req.body.emailFromFront,
       password: SHA256(req.body.passwordFromFront + salt).toString(encBase64),
       token: uid2(32),
@@ -106,7 +107,8 @@ router.post("/sign-up/influencer", async function (req, res, next) {
     req.body.bioFromFront == "" ||
     req.body.favoriteGameFromFront == "" ||
     req.body.numberFollower == "" ||
-    req.body.urlSocialNetworkFromFront == ""
+    req.body.urlSocialNetworkFromFront == "" ||
+    req.body.imageUploadFromFront == ""
   ) {
     error.push("Empty Field");
   }
@@ -117,6 +119,7 @@ router.post("/sign-up/influencer", async function (req, res, next) {
       firstName: req.body.firstNameFromFront,
       lastName: req.body.lastNameFromFront,
       email: req.body.emailFromFront,
+      imageUpload: req.body.imageUploadFromFront,
       bio: req.body.bioFromFront,
       password: SHA256(req.body.passwordFromFront + salt).toString(encBase64),
       token: uid2(32),
@@ -295,11 +298,11 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const fileName = file.originalname.toLowerCase().split(" ").join("-");
-    cb(null, fileName + Date.now());
+    cb(null, Date.now() + fileName);
   },
 });
 
-var upload = multer({
+const upload = multer({
   storage: storage,
   fileFilter: (req, file, cb) => {
     if (
@@ -315,15 +318,14 @@ var upload = multer({
   },
 });
 
-router.post("/image-upload", upload.single("image"), function (req, res) {
-  console.log("req.file", req.file);
+router.post("/image-upload", upload.single("image"), async function (req, res) {
   try {
     if (!req.file) {
       throw new Error("Image is not presented!");
+    } else {
+      const resultCloudinary = await cloudinary.uploader.upload(req.file.path);
+      return res.json({ message: "Huraaaay", resultCloudinary });
     }
-    console.log(req.file);
-
-    return res.json({ message: "Huraaaay" });
   } catch (e) {
     return res.status(422).send({ message: e.message });
   }
